@@ -20,7 +20,10 @@ fn main() {
     let mut turn = 0;
     while !won && turn < TURN_LIMIT {
         // TODO: error handling
+        write!(stdout(), "Your guess: ").unwrap();
+        stdout().flush().unwrap();
         board.input = read_input(&mut input).unwrap();
+        writeln!(stdout()).unwrap();
 
         won = is_win(&board.score());
 
@@ -73,8 +76,6 @@ fn render(word: &Word, score: &Score, mut w: impl Write) {
         };
         write!(w, "\x1b[{color}m{0}\x1b[m", *c as char).unwrap();
     }
-    writeln!(w, "").unwrap();
-    w.flush().unwrap();
 }
 
 type Score = [LetterScore; 5];
@@ -141,9 +142,10 @@ impl fmt::Display for Board {
         let mut s: Vec<u8> = Vec::new();
         for (word, score) in &self.guesses {
             render(&word, &score, &mut s);
+            s.push(b'\n');
         }
-        f.write_str(&String::from_utf8(s).expect("rendered word isn't ascii"))?;
-        Ok(())
+
+        f.write_str(&String::from_utf8(s).expect("rendered word isn't ascii"))
     }
 }
 
