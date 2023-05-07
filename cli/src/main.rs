@@ -107,6 +107,10 @@ fn render(word: &Word, score: &Score, mut w: impl Write) {
 type Score = [LetterScore; 5];
 
 fn score(word: &Word, guess: &Word) -> Score {
+    if word == guess {
+        return [LetterScore::Right; 5];
+    }
+
     // invalid ascii byte to use as a placeholder
     const SENTINEL: u8 = u8::MAX;
     let mut score = Score::default();
@@ -249,6 +253,7 @@ mod tests {
             (b"words", b"birds", [Wrong, Wrong, Right, Right, Right]),
             (b"tests", b"stabs", [InWord, InWord, Wrong, Wrong, Right]),
             (b"cargo", b"gocar", [InWord; 5]),
+            (b"cargo", b"cargo", [Right; 5]),
             (b"stark", b"lossy", [Wrong, Wrong, InWord, Wrong, Wrong]),
             (b"liege", b"liens", [Right, Right, Right, Wrong, Wrong]),
             (b"liege", b"litre", [Right, Right, Wrong, Wrong, Right]),
