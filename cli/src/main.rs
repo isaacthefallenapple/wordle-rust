@@ -39,7 +39,7 @@ fn main() {
     }
 }
 
-/// Clears `buf`.
+/// `read_input` reads one guess from stdin into `buf`. Clears `buf` in the process.
 fn read_input(buf: &mut String) -> io::Result<Word> {
     buf.clear();
     std::io::stdin().read_line(buf)?;
@@ -60,13 +60,18 @@ fn pick_random_word(random_state: &mut Rand) -> Word {
 
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[repr(u8)]
+/// The score of a single letter.
 enum LetterScore {
     #[default]
+    /// A letter that is not in the word at all.
     Wrong,
+    /// A letter that is in the word but at a different spot.
     InWord,
+    /// A letter both in the word and at the right spot.
     Right,
 }
 
+/// Renders `word` to `w` given `score`. Uses ANSI escapes to color the letters.
 fn render(word: &Word, score: &Score, mut w: impl Write) {
     for (c, s) in word.iter().zip(score) {
         let color = match s {
