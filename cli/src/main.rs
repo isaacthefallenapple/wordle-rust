@@ -177,6 +177,8 @@ mod tests {
             (b"tests", b"stabs", [InWord, InWord, Wrong, Wrong, Right]),
             (b"cargo", b"gocar", [InWord; 5]),
             (b"stark", b"lossy", [Wrong, Wrong, InWord, Wrong, Wrong]),
+            (b"liege", b"liens", [Right, Right, Right, Wrong, Wrong]),
+            (b"liege", b"litre", [Right, Right, Wrong, Wrong, Right]),
         ];
 
         for (w, g, expected) in table {
