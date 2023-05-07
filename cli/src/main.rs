@@ -115,12 +115,12 @@ fn score(word: &Word, guess: &Word) -> Score {
         }
     }
 
-    for (i, g) in guess.iter().enumerate() {
-        if score[i] == LetterScore::Right {
+    for (g, s) in guess.iter().zip(score.iter_mut()) {
+        if *s == LetterScore::Right {
             continue;
         }
         if let Some(w) = word.iter_mut().find(|w| *w == g) {
-            score[i] = LetterScore::InWord;
+            *s = LetterScore::InWord;
             *w = SENTINEL;
         }
     }
