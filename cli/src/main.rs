@@ -1,8 +1,5 @@
 use core::fmt;
-use std::{
-    fmt::Display,
-    io::{self, stdout, Read, Write},
-};
+use std::io::{self, stdout, Write};
 
 use words::{Word, WORDS};
 
@@ -15,12 +12,22 @@ fn main() {
 
     let mut input = String::new();
     let mut won = false;
-    while !won {
+    let mut turn = 0;
+    while !won && turn < 6 {
         // TODO: error handling
         board.input = read_input(&mut input).unwrap();
 
         won = is_win(&board.score());
+
         writeln!(stdout(), "{}", board).unwrap();
+
+        turn += 1;
+    }
+
+    if won {
+        println!("Congrats!");
+    } else {
+        println!("Sorry, the word was {}", String::from_utf8_lossy(&word));
     }
 }
 
