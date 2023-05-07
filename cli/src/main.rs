@@ -71,6 +71,22 @@ enum LetterScore {
     Right,
 }
 
+impl LetterScore {
+    const WRONG: u8 = 0;
+    const IN_WORD: u8 = 1;
+    const RIGHT: u8 = 2;
+
+    // this is obviously unfortunate compared to just assigning the variants directly
+    // but should the variants ever need special values this will come in handy.
+    const fn variant(self) -> u8 {
+        match self {
+            Self::Wrong => Self::WRONG,
+            Self::InWord => Self::IN_WORD,
+            Self::Right => Self::RIGHT,
+        }
+    }
+}
+
 /// Renders `word` to `w` given `score`. Uses ANSI escapes to color the letters.
 fn render(word: &Word, score: &Score, mut w: impl Write) {
     for (c, s) in word.iter().zip(score) {
@@ -121,7 +137,7 @@ fn compress(score: &Score) -> u8 {
     let mut compressed = 0;
     for s in score.iter() {
         compressed *= 3;
-        compressed += *s as u8;
+        compressed += s.variant();
     }
     compressed
 }
@@ -132,9 +148,9 @@ fn decompress(mut score: u8) -> Score {
     let mut decompressed = Score::default();
     for i in 0..decompressed.len() {
         let ls = match score % 3 {
-            0 => LetterScore::Wrong,
-            1 => LetterScore::InWord,
-            2 => LetterScore::Right,
+            LetterScore::WRONG => LetterScore::Wrong,
+            LetterScore::IN_WORD => LetterScore::InWord,
+            LetterScore::RIGHT => LetterScore::Right,
             _ => unreachable!(),
         };
         decompressed[decompressed.len() - 1 - i] = ls;
