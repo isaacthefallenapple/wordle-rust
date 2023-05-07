@@ -27,7 +27,7 @@ fn main() {
     if won {
         println!("Congrats!");
     } else {
-        println!("Sorry, the word was {}", String::from_utf8_lossy(&word));
+        println!("Sorry, the word was {}", board.word_as_str());
     }
 }
 
@@ -124,6 +124,10 @@ impl Board {
         let score = score(&self.word, &self.input);
         self.guesses.push((self.input, score));
         score
+    }
+
+    fn word_as_str(&self) -> &str {
+        std::str::from_utf8(&self.word).unwrap()
     }
 }
 
