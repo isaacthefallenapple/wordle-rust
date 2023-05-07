@@ -96,12 +96,13 @@ impl LetterScore {
 }
 
 /// Renders `word` to `w` given `score`. Uses ANSI escapes to color the letters.
-fn render(word: &Word, score: &Score, mut w: impl Write) {
+fn render(word: &Word, score: &Score, mut w: impl Write) -> io::Result<()> {
     for (c, s) in word.iter().zip(score) {
         let color = s.bg_color();
-        write!(w, "\x1b[30;{color}m{0}", *c as char).unwrap();
+        write!(w, "\x1b[30;{color}m{0}", *c as char)?;
     }
-    write!(w, "\x1b[m").unwrap();
+    write!(w, "\x1b[m")?;
+    Ok(())
 }
 
 type Score = [LetterScore; 5];
@@ -203,7 +204,7 @@ impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s: Vec<u8> = Vec::new();
         for (word, score) in &self.guesses {
-            render(&word, &score, &mut s);
+            render(&word, &score, &mut s).expect("OOM");
             s.push(b'\n');
         }
 
