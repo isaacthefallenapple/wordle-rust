@@ -75,6 +75,8 @@ fn render(word: &Word, score: &Score, mut w: impl Write) {
 type Score = [LetterScore; 5];
 
 fn score(word: &Word, guess: &Word) -> Score {
+    // invalid ascii byte to use as a placeholder
+    const SENTINEL: u8 = u8::MAX;
     let mut score = Score::default();
     let mut word = *word;
 
@@ -82,17 +84,17 @@ fn score(word: &Word, guess: &Word) -> Score {
     for (i, (w, g)) in word.iter_mut().zip(guess).enumerate() {
         if w == g {
             score[i] = LetterScore::Right;
-            *w = 0;
+            *w = SENTINEL;
         }
     }
 
     for (i, g) in guess.iter().enumerate() {
-        for (_, w) in word.iter_mut().enumerate().filter(|(j, _)| *j != i) {
-            if g == w {
-                score[i] = LetterScore::InWord;
-                *w = 0;
-                break;
-            }
+        if score[i] == LetterScore::Right {
+            continue;
+        }
+        if let Some(w) = word.iter_mut().find(|w| *w == g) {
+            score[i] = LetterScore::InWord;
+            *w = SENTINEL;
         }
     }
 
