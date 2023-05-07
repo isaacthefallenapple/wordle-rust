@@ -5,6 +5,10 @@ use words::{Word, WORDS};
 
 mod words;
 
+// TODO: let users pass this in
+/// The maximum number of turns a player is allowed to take.
+const TURN_LIMIT: usize = 6;
+
 fn main() {
     let mut rand = Rand::default();
     let word = pick_random_word(&mut rand);
@@ -13,7 +17,7 @@ fn main() {
     let mut input = String::new();
     let mut won = false;
     let mut turn = 0;
-    while !won && turn < 6 {
+    while !won && turn < TURN_LIMIT {
         // TODO: error handling
         board.input = read_input(&mut input).unwrap();
 
