@@ -151,6 +151,8 @@ impl fmt::Display for Board {
 struct Rand(u64);
 
 impl Rand {
+    // TODO: let users pass in a seed
+    #[allow(unused)]
     fn new(seed: u64) -> Self {
         Self(seed)
     }
