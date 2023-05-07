@@ -33,7 +33,7 @@ fn main() {
     }
 
     if won {
-        println!("Congrats!");
+        println!("🎉🎊🥳");
     } else {
         println!("Sorry, the word was {}", board.word_as_str());
     }
