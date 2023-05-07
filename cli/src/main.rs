@@ -164,6 +164,7 @@ fn decompress(mut score: u8) -> Score {
     decompressed
 }
 
+/// Determines whether a score is winning.
 fn is_win(score: &Score) -> bool {
     score.iter().all(|&s| s == LetterScore::Right)
 }
