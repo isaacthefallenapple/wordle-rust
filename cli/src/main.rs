@@ -112,6 +112,37 @@ fn score(word: &Word, guess: &Word) -> Score {
     score
 }
 
+/// `compress` compresses a `Score` into a single byte.
+/// This works out because log2(3^5) < 8.
+///
+/// [`decompress`] reverses this process again.
+#[allow(unused)]
+fn compress(score: &Score) -> u8 {
+    let mut compressed = 0;
+    for s in score.iter() {
+        compressed *= 3;
+        compressed += *s as u8;
+    }
+    compressed
+}
+
+/// `decompress` reverses the [`compress`] process.
+#[allow(unused)]
+fn decompress(mut score: u8) -> Score {
+    let mut decompressed = Score::default();
+    for i in 0..decompressed.len() {
+        let ls = match score % 3 {
+            0 => LetterScore::Wrong,
+            1 => LetterScore::InWord,
+            2 => LetterScore::Right,
+            _ => unreachable!(),
+        };
+        decompressed[decompressed.len() - 1 - i] = ls;
+        score /= 3;
+    }
+    decompressed
+}
+
 fn is_win(score: &Score) -> bool {
     score.iter().all(|&s| s == LetterScore::Right)
 }
@@ -207,6 +238,7 @@ mod tests {
         for (w, g, expected) in table {
             let got = score(w, g);
             assert_eq!(got, expected);
+            assert_eq!(got, decompress(compress(&got)));
         }
     }
 }
