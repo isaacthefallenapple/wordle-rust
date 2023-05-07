@@ -192,6 +192,9 @@ mod tests {
             (b"stark", b"lossy", [Wrong, Wrong, InWord, Wrong, Wrong]),
             (b"liege", b"liens", [Right, Right, Right, Wrong, Wrong]),
             (b"liege", b"litre", [Right, Right, Wrong, Wrong, Right]),
+            (b"abcde", b"edcba", [InWord, InWord, Right, InWord, InWord]),
+            (b"abcde", b"ccccc", [Wrong, Wrong, Right, Wrong, Wrong]),
+            (b"abcde", b"ccxxx", [InWord, Wrong, Wrong, Wrong, Wrong]),
         ];
 
         for (w, g, expected) in table {
