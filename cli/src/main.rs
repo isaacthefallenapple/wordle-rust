@@ -85,18 +85,23 @@ impl LetterScore {
             Self::Right => Self::RIGHT,
         }
     }
+
+    const fn bg_color(self) -> u8 {
+        match self {
+            Self::Wrong => 100,
+            Self::InWord => 43,
+            Self::Right => 42,
+        }
+    }
 }
 
 /// Renders `word` to `w` given `score`. Uses ANSI escapes to color the letters.
 fn render(word: &Word, score: &Score, mut w: impl Write) {
     for (c, s) in word.iter().zip(score) {
-        let color = match s {
-            LetterScore::Wrong => 90,
-            LetterScore::InWord => 93,
-            LetterScore::Right => 32,
-        };
-        write!(w, "\x1b[{color}m{0}\x1b[m", *c as char).unwrap();
+        let color = s.bg_color();
+        write!(w, "\x1b[30;{color}m{0}", *c as char).unwrap();
     }
+    write!(w, "\x1b[m").unwrap();
 }
 
 type Score = [LetterScore; 5];
