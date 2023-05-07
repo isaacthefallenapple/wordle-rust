@@ -3,6 +3,7 @@ use std::io::{self, stdout, Write};
 
 use words::{Word, WORDS};
 
+// TODO: let users pass in their own word lists
 mod words;
 
 // TODO: let users pass this in
