@@ -146,6 +146,8 @@ impl fmt::Display for Board {
         Ok(())
     }
 }
+
+/// `Rand` is a simple XorShift RNG.
 struct Rand(u64);
 
 impl Rand {
