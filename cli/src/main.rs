@@ -68,8 +68,8 @@ fn render(word: &Word, score: &Score, mut w: impl Write) {
         };
         write!(w, "\x1b[{color}m{0}\x1b[m", *c as char).unwrap();
     }
-    writeln!(w, "");
-    w.flush();
+    writeln!(w, "").unwrap();
+    w.flush().unwrap();
 }
 
 type Score = [LetterScore; 5];
