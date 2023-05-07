@@ -58,12 +58,12 @@ fn pick_random_word(random_state: &mut Rand) -> Word {
     *WORDS[index as usize]
 }
 
+/// The score of a single letter.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
 #[repr(u8)]
-/// The score of a single letter.
 enum LetterScore {
-    #[default]
     /// A letter that is not in the word at all.
+    #[default]
     Wrong,
     /// A letter that is in the word but at a different spot.
     InWord,
