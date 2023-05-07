@@ -20,14 +20,14 @@ fn main() {
     let mut turn = 0;
     while !won && turn < TURN_LIMIT {
         // TODO: error handling
-        write!(stdout(), "Your guess: ").unwrap();
+        print!("Your guess: ");
         stdout().flush().unwrap();
         board.input = read_input(&mut input).unwrap();
-        writeln!(stdout()).unwrap();
+        println!();
 
         won = is_win(&board.score());
 
-        writeln!(stdout(), "{}", board).unwrap();
+        println!("{}", board);
 
         turn += 1;
     }
