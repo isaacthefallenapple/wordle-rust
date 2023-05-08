@@ -220,6 +220,7 @@ impl Rand {
 }
 
 impl Default for Rand {
+    /// Seeds the random state with the current time.
     fn default() -> Self {
         use std::time::SystemTime;
         let seed = SystemTime::now()
