@@ -4,11 +4,11 @@ use std::io::{self, stdout, Read, Write};
 use error::InvalidInputError;
 use words::{Word, WORDS};
 
-type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
-
 // TODO: let users pass in their own word lists
 mod error;
 mod words;
+
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 // TODO: let users pass this in
 /// The maximum number of turns a player is allowed to take.
