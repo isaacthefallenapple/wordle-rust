@@ -152,6 +152,7 @@ fn score(word: &Word, guess: &Word) -> Score {
     score
 }
 
+#[derive(Default)]
 struct Board {
     word: Word,
     input: Word,
@@ -163,9 +164,7 @@ impl Board {
     fn new(word: Word) -> Self {
         Self {
             word,
-            input: Default::default(),
-            guesses: Default::default(),
-            turn: 0,
+            ..Default::default()
         }
     }
 
