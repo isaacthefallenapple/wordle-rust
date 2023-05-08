@@ -17,8 +17,7 @@ fn main() {
 
     let mut input = String::new();
     let mut won = false;
-    let mut turn = 0;
-    while !won && turn < TURN_LIMIT {
+    while !won && board.turn() < TURN_LIMIT {
         // TODO: error handling
         print!("Your guess: ");
         stdout().flush().unwrap();
@@ -28,8 +27,6 @@ fn main() {
         won = board.score().is_win();
 
         println!("{}", board);
-
-        turn += 1;
     }
 
     if won {
@@ -156,7 +153,7 @@ struct Board {
     word: Word,
     input: Word,
     guesses: [(Word, Score); TURN_LIMIT],
-    round: usize,
+    turn: usize,
 }
 
 impl Board {
@@ -165,26 +162,30 @@ impl Board {
             word,
             input: Default::default(),
             guesses: Default::default(),
-            round: 0,
+            turn: 0,
         }
     }
 
     fn score(&mut self) -> Score {
         let score = score(&self.word, &self.input);
-        self.guesses[self.round] = (self.input, score);
-        self.round += 1;
+        self.guesses[self.turn] = (self.input, score);
+        self.turn += 1;
         score
     }
 
     fn word_as_str(&self) -> &str {
         std::str::from_utf8(&self.word).unwrap()
     }
+
+    fn turn(&self) -> usize {
+        self.turn
+    }
 }
 
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s: Vec<u8> = Vec::new();
-        for (word, score) in &self.guesses[0..self.round] {
+        for (word, score) in &self.guesses[0..self.turn] {
             render(word, *score, &mut s).expect("OOM");
             s.push(b'\n');
         }
