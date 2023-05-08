@@ -1,4 +1,4 @@
-use core::fmt;
+use std::fmt;
 use std::io::{self, stdout, Read, Write};
 
 use words::{Word, WORDS};
