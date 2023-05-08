@@ -1,11 +1,13 @@
 use std::fmt;
 use std::io::{self, stdout, Read, Write};
 
+use error::InvalidInputError;
 use words::{Word, WORDS};
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 // TODO: let users pass in their own word lists
+mod error;
 mod words;
 
 // TODO: let users pass this in
@@ -44,8 +46,12 @@ fn read_input() -> Result<Word> {
     // 5 letters + \n
     let mut buf = [0u8; 6];
     let n = std::io::stdin().read(&mut buf)?;
-    if n < 6 || *buf.last().unwrap() != b'\n' || !buf.is_ascii() {
-        panic!("wrong user input");
+
+    if n < 6 || *buf.last().unwrap() != b'\n' {
+        return Err(InvalidInputError::InputLength.into());
+    }
+    if let Some(&c) = buf.iter().find(|c| !c.is_ascii()) {
+        return Err(InvalidInputError::NonAscii(c).into());
     }
 
     // ok to unwrap here, size has been asserted
