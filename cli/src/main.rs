@@ -12,7 +12,7 @@ mod words;
 /// The maximum number of turns a player is allowed to take.
 const TURN_LIMIT: usize = 6;
 
-fn main() {
+fn main() -> Result<()> {
     let mut rand = Rand::default();
     let word = pick_random_word(&mut rand);
     let mut board = Board::new(word);
@@ -21,8 +21,8 @@ fn main() {
     while !won && board.turn() < TURN_LIMIT {
         // TODO: error handling
         print!("Your guess: ");
-        stdout().flush().unwrap();
-        board.input = read_input().unwrap();
+        stdout().flush()?;
+        board.input = read_input()?;
         println!();
 
         won = board.score().is_win();
@@ -35,6 +35,8 @@ fn main() {
     } else {
         println!("Sorry, the word was {}", board.word_as_str());
     }
+
+    Ok(())
 }
 
 /// `read_input` reads one guess from stdin into `buf`. Clears `buf` in the process.
