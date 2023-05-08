@@ -1,7 +1,9 @@
 use core::fmt;
-use std::io::{self, stdout, Write};
+use std::io::{self, stdout, Read, Write};
 
 use words::{Word, WORDS};
+
+type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
 // TODO: let users pass in their own word lists
 mod words;
@@ -15,13 +17,12 @@ fn main() {
     let word = pick_random_word(&mut rand);
     let mut board = Board::new(word);
 
-    let mut input = String::new();
     let mut won = false;
     while !won && board.turn() < TURN_LIMIT {
         // TODO: error handling
         print!("Your guess: ");
         stdout().flush().unwrap();
-        board.input = read_input(&mut input).unwrap();
+        board.input = read_input().unwrap();
         println!();
 
         won = board.score().is_win();
@@ -37,14 +38,16 @@ fn main() {
 }
 
 /// `read_input` reads one guess from stdin into `buf`. Clears `buf` in the process.
-fn read_input(buf: &mut String) -> io::Result<Word> {
-    buf.clear();
-    std::io::stdin().read_line(buf)?;
-    assert!(buf.is_ascii());
+fn read_input() -> Result<Word> {
     // 5 letters + \n
-    assert_eq!(buf.len(), 6);
+    let mut buf = [0u8; 6];
+    let n = std::io::stdin().read(&mut buf)?;
+    if n < 6 || *buf.last().unwrap() != b'\n' || !buf.is_ascii() {
+        panic!("wrong user input");
+    }
+
     // ok to unwrap here, size has been asserted
-    let mut guess = Word::try_from(&buf.as_bytes()[..5]).unwrap();
+    let mut guess = Word::try_from(&buf[..5]).unwrap();
     guess.make_ascii_uppercase();
 
     Ok(guess)
