@@ -155,7 +155,8 @@ fn score(word: &Word, guess: &Word) -> Score {
 struct Board {
     word: Word,
     input: Word,
-    guesses: Vec<(Word, Score)>,
+    guesses: [(Word, Score); TURN_LIMIT],
+    round: usize,
 }
 
 impl Board {
@@ -163,13 +164,15 @@ impl Board {
         Self {
             word,
             input: Default::default(),
-            guesses: Vec::with_capacity(6),
+            guesses: Default::default(),
+            round: 0,
         }
     }
 
     fn score(&mut self) -> Score {
         let score = score(&self.word, &self.input);
-        self.guesses.push((self.input, score));
+        self.guesses[self.round] = (self.input, score);
+        self.round += 1;
         score
     }
 
@@ -181,7 +184,7 @@ impl Board {
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let mut s: Vec<u8> = Vec::new();
-        for (word, score) in &self.guesses {
+        for (word, score) in &self.guesses[0..self.round] {
             render(word, *score, &mut s).expect("OOM");
             s.push(b'\n');
         }
