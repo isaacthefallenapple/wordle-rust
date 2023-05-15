@@ -1,11 +1,12 @@
-use std::fmt;
-use std::io::{self, stdout, Read, Write};
+use std::fmt::{self, Write as _};
+use std::io::{stdout, Read, Write};
 
 use error::InvalidInputError;
 use words::{Word, WORDS};
 
 // TODO: let users pass in their own word lists
 mod error;
+mod stats;
 mod words;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
@@ -99,7 +100,7 @@ impl LetterScore {
 }
 
 /// Renders `word` to `w` given `score`. Uses ANSI escapes to color the letters.
-fn render(word: &Word, score: Score, mut w: impl Write) -> io::Result<()> {
+fn render(mut w: impl fmt::Write, word: &Word, score: Score) -> fmt::Result {
     for (i, c) in word.iter().enumerate() {
         let color = score.get(i).bg_color();
         write!(w, "\x1b[30;{color}m{0}", *c as char)?;
@@ -194,13 +195,12 @@ impl Board {
 
 impl fmt::Display for Board {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let mut s: Vec<u8> = Vec::new();
         for (word, score) in &self.guesses[0..self.turn] {
-            render(word, *score, &mut s).expect("OOM");
-            s.push(b'\n');
+            render(&mut *f, word, *score).expect("OOM");
+            f.write_char('\n')?;
         }
 
-        f.write_str(&String::from_utf8(s).expect("rendered word isn't ascii"))
+        Ok(())
     }
 }
 
