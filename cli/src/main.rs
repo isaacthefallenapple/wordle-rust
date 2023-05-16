@@ -25,7 +25,13 @@ fn main() -> Result<()> {
         // TODO: error handling
         print!("Your guess: ");
         stdout().flush()?;
-        board.input = read_input()?;
+        board.input = match read_input() {
+            Ok(input) => input,
+            Err(e) => {
+                eprintln!("{}", e);
+                continue;
+            }
+        };
         println!();
 
         won = board.score().is_win();
@@ -48,9 +54,18 @@ fn read_input() -> Result<Word> {
     let mut buf = [0u8; 6];
     let n = std::io::stdin().read(&mut buf)?;
 
-    if n < 6 || *buf.last().unwrap() != b'\n' {
+    if n < 6 {
         return Err(InvalidInputError::InputLength.into());
     }
+    if *buf.last().unwrap() != b'\n' {
+        let mut stdin = std::io::stdin().lock();
+        // clear stdin for next guess
+        while !buf.contains(&b'\n') {
+            stdin.read(&mut buf)?;
+        }
+        return Err(InvalidInputError::InputLength.into());
+    }
+
     if let Some(&c) = buf.iter().find(|c| !c.is_ascii()) {
         return Err(InvalidInputError::NonAscii(c).into());
     }
