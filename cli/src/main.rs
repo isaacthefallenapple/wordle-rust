@@ -2,12 +2,11 @@ use std::fmt::{self, Write as _};
 use std::io::{stdout, Read, Write};
 
 use error::InvalidInputError;
-use words::{Word, WORDS};
+use words::Word;
 
 // TODO: let users pass in their own word lists
 mod error;
 mod stats;
-mod words;
 
 type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 
@@ -16,8 +15,7 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 const TURN_LIMIT: usize = 6;
 
 fn main() -> Result<()> {
-    let mut rand = Rand::default();
-    let word = pick_random_word(&mut rand);
+    let word = words::pick_random_word();
     let mut board = Board::new(word);
 
     let mut won = false;
@@ -75,11 +73,6 @@ fn read_input() -> Result<Word> {
     guess.make_ascii_uppercase();
 
     Ok(guess)
-}
-
-fn pick_random_word(random_state: &mut Rand) -> Word {
-    let index = random_state.sample() % words::WORD_COUNT as u64;
-    *WORDS[index as usize]
 }
 
 /// The score of a single letter.
@@ -216,39 +209,6 @@ impl fmt::Display for Board {
         }
 
         Ok(())
-    }
-}
-
-/// `Rand` is a simple XorShift RNG.
-struct Rand(u64);
-
-impl Rand {
-    // TODO: let users pass in a seed
-    #[allow(unused)]
-    fn new(seed: u64) -> Self {
-        Self(seed)
-    }
-
-    fn sample(&mut self) -> u64 {
-        let x = &mut self.0;
-
-        *x ^= *x << 13;
-        *x ^= *x >> 17;
-        *x ^= *x << 5;
-
-        return *x;
-    }
-}
-
-impl Default for Rand {
-    /// Seeds the random state with the current time.
-    fn default() -> Self {
-        use std::time::SystemTime;
-        let seed = SystemTime::now()
-            .duration_since(SystemTime::UNIX_EPOCH)
-            .expect("time went backwards")
-            .as_nanos() as u64;
-        Self(seed)
     }
 }
 
