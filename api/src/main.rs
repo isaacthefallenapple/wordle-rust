@@ -1,5 +1,6 @@
 use std::error;
 use std::fmt;
+use std::fs::write;
 use std::io::{prelude::*, BufReader};
 use std::net::{TcpListener, TcpStream};
 use words;
@@ -19,20 +20,42 @@ fn main() -> Result<()> {
 
 fn handle(mut stream: TcpStream) -> Result<()> {
     let reader = BufReader::new(&mut stream);
-
-    let Some(request_line) = reader
+    let lines: Vec<_> = reader
         .lines()
-        .find(|line| line.as_ref().map_or(false, |line| line.starts_with("GET"))) else {
+        .take_while(|line| line.as_ref().map_or(true, |line| !line.is_empty()))
+        .collect::<std::result::Result<_, _>>()?;
+
+    println!("{lines:#?}");
+
+    let Some(request_line) = lines
+        .iter()
+        .find(|line| 
+            line.starts_with("GET") || line.starts_with("HEAD") || line.starts_with("OPTIONS")
+        ) else {
         return Err("no request line".into());
     };
 
-    let request_line = request_line?;
-    let path = request_line.split_ascii_whitespace().nth(1).unwrap();
-    println!("{path}");
-    match path {
+    let request = parse_request_line(&request_line)?;
+    match request.method {
+        Method::Options => {
+            handle_cors(&mut stream)?;
+            return Ok(());
+        }
+        _ => {}
+    }
+    match &*request.resource {
         "/word" => handle_word(&mut stream)?,
         _ => handle_not_found(&mut stream)?,
     }
+    Ok(())
+}
+
+fn handle_cors(stream: &mut TcpStream) -> Result<()> {
+    write!(
+        stream,
+        "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\n\r\n"
+    )?;
+
     Ok(())
 }
 
@@ -49,11 +72,40 @@ fn handle_word(stream: &mut TcpStream) -> Result<()> {
 
     write!(
         stream,
-        "HTTP/1.1 200 OK\r\nContent-Type: application/json\r\nContent-Length: {length}\r\n\r\n{json}",
+        "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: application/json\r\nContent-Length: {length}\r\n\r\n{json}",
         length = json.len()
     )?;
 
     Ok(())
+}
+
+fn parse_request_line(req: &str) -> Result<Request> {
+    let mut req = req.split_ascii_whitespace();
+    let method = req.next().unwrap();
+    let resource = req.next().unwrap();
+
+    Ok(Request {
+        method: match method {
+            "GET" => Method::Get,
+            "HEAD" => Method::Head,
+            "OPTIONS" => Method::Options,
+            _ => return Err("unknown method".into()),
+        },
+        resource: resource.to_string(),
+    })
+}
+
+#[derive(Debug)]
+struct Request {
+    method: Method,
+    resource: String,
+}
+
+#[derive(Debug, Clone, Copy)]
+enum Method {
+    Get,
+    Options,
+    Head,
 }
 
 struct Error(String);
