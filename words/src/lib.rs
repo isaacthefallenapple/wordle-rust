@@ -1,26 +1,14 @@
 pub use data::Word;
 pub use data::WORDS;
-use std::sync::Once;
+
+use rand::{seq::SliceRandom, Rng, RngCore};
 
 mod data;
 pub mod hash;
 
-static mut STATE: Rand = Rand(0);
-static INIT: Once = Once::new();
-
-fn get_state() -> &'static mut Rand {
-    unsafe {
-        INIT.call_once(|| {
-            STATE = Default::default();
-        });
-        &mut STATE
-    }
-}
-
 /// Returns a random word from [`WORDS`].
-pub fn pick_random_word() -> Word {
-    let index = get_state().sample() % data::WORD_COUNT as u64;
-    *WORDS[index as usize]
+pub fn pick_random_word<R: Rng + ?Sized>(random_state: &mut R) -> Word {
+    **WORDS.choose(random_state).expect("WORDS has no elements")
 }
 
 /// Returns a `&[u8; 5]` as a `&str`.
@@ -29,23 +17,41 @@ pub fn to_str(word: &Word) -> &str {
 }
 
 /// `Rand` is a simple XorShift RNG.
-struct Rand(u64);
+pub struct Rand(u64);
+
+impl RngCore for Rand {
+    fn next_u64(&mut self) -> u64 {
+        self.sample().to_le()
+    }
+
+    fn next_u32(&mut self) -> u32 {
+        self.next_u64() as u32
+    }
+
+    fn fill_bytes(&mut self, dest: &mut [u8]) {
+        rand_core::impls::fill_bytes_via_next(self, dest)
+    }
+
+    fn try_fill_bytes(&mut self, dest: &mut [u8]) -> Result<(), rand_core::Error> {
+        self.fill_bytes(dest);
+        Ok(())
+    }
+}
 
 impl Rand {
     // TODO: let users pass in a seed
-    #[allow(unused)]
-    fn new(seed: u64) -> Self {
+    pub fn new(seed: u64) -> Self {
         Self(seed)
     }
 
-    fn sample(&mut self) -> u64 {
+    pub fn sample(&mut self) -> u64 {
         let x = &mut self.0;
 
         *x ^= *x << 13;
         *x ^= *x >> 17;
         *x ^= *x << 5;
 
-        return *x;
+        *x
     }
 }
 
