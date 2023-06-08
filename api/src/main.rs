@@ -66,7 +66,8 @@ fn handle_not_found(stream: &mut TcpStream) -> Result<()> {
 }
 
 fn handle_word(stream: &mut TcpStream) -> Result<()> {
-    let word = words::pick_random_word();
+    let mut random_state = words::Rand::default();
+    let word = words::pick_random_word(&mut random_state);
     let word = words::to_str(&word);
     let json = format!("{{ \"value\": \"{word}\" }}");
 
