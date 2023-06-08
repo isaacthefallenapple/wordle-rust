@@ -1,6 +1,6 @@
 use std::error;
 use std::fmt;
-use std::fs::write;
+
 use std::io::{prelude::*, BufReader};
 use std::net::{TcpListener, TcpStream};
 use words;
