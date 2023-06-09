@@ -15,7 +15,8 @@ type Result<T> = std::result::Result<T, Box<dyn std::error::Error>>;
 const TURN_LIMIT: usize = 6;
 
 fn main() -> Result<()> {
-    let word = words::pick_random_word();
+    let mut random_state = words::Rand::default();
+    let word = words::pick_random_word(&mut random_state);
     let mut board = Board::new(word);
 
     let mut won = false;
