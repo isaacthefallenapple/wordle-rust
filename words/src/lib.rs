@@ -11,6 +11,10 @@ pub fn pick_random_word<R: Rng + ?Sized>(random_state: &mut R) -> Word {
     **WORDS.choose(random_state).expect("WORDS has no elements")
 }
 
+pub fn check(word: &Word) -> bool {
+    data::check(word)
+}
+
 /// Returns a `&[u8; 5]` as a `&str`.
 pub fn to_str(word: &Word) -> &str {
     unsafe { std::str::from_utf8_unchecked(word) }

@@ -1,3 +1,7 @@
+use std::sync::OnceLock;
+
+use rustc_hash::FxHashSet;
+
 pub type Word = [u8; 5];
 
 pub const WORD_COUNT: usize = 2315;
@@ -262,3 +266,29 @@ pub const WORDS: [&Word; WORD_COUNT] = [
     b"WRUNG", b"WRYLY", b"YACHT", b"YEARN", b"YEAST", b"YIELD", b"YOUNG", b"YOUTH", b"ZEBRA",
     b"ZESTY", b"ZONAL",
 ];
+
+static WORD_SET: OnceLock<FxHashSet<&Word>> = OnceLock::new();
+
+fn init_word_set() -> FxHashSet<&'static Word> {
+    let mut word_set = FxHashSet::default();
+    for word in WORDS {
+        word_set.insert(word);
+    }
+    word_set
+}
+
+pub fn check(word: &Word) -> bool {
+    let word_set = WORD_SET.get_or_init(init_word_set);
+    word_set.contains(word)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn test_check() {
+        for word in WORDS {
+            assert!(check(word));
+        }
+    }
+}
