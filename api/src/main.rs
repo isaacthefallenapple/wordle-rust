@@ -45,8 +45,35 @@ fn handle(mut stream: TcpStream) -> Result<()> {
     }
     match &*request.resource {
         "/word" => handle_word(&mut stream)?,
+        route if route.starts_with("/words?check=") => {
+            handle_check(&mut stream, route)?;
+        }
         _ => handle_not_found(&mut stream)?,
     }
+    Ok(())
+}
+
+fn handle_check(stream: &mut TcpStream, route: &str) -> Result<()> {
+    let Some(word) = route.rsplit("=").next() else {
+        write!(stream, "HTTP/1.1 400 Bad Request\r\n")?;
+        return Ok(());
+    };
+
+    let Ok(word) = word.as_bytes().try_into() else {
+        eprintln!("invalid word format: {word} ({word:?})");
+        return Err(Error("invalid word format".into()).into());
+    };
+
+    let ok = words::check(word);
+
+    let json = format!("{{ \"ok\": \"{ok}\" }}");
+
+    write!(
+        stream,
+        "HTTP/1.1 200 OK\r\nAccess-Control-Allow-Origin: *\r\nContent-Type: application/json\r\nContent-Length: {length}\r\n\r\n{json}",
+        length = json.len()
+    )?;
+
     Ok(())
 }
 
